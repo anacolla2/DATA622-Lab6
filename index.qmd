@@ -21,17 +21,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-import xgboost as xgb
 
-
-from sklearn import model_selection as ms
-from sklearn import preprocessing as pp
-from sklearn import compose
-from sklearn import pipeline
-from sklearn import linear_model
-from sklearn import tree
-from sklearn import ensemble
-from sklearn import metrics
 ```
 
 # **Overview**
@@ -116,7 +106,7 @@ where `coefs_Y` is random (we are using the same `support` in both simulations).
 Using the code from the vignette, fit a Causal Forest (`CausalForestDML`) and a
 linear model (`LinearDML`) to the simulated data.
 
-For both models, plot the predicted elasticity as a function of the \`INCOME\`,
+For both models, plot the predicted elasticity as a function of the `INCOME`,
 showing the confidence intervals and the real relationship.
 
 Also plot the predicted elasticity and the true elasticity for each simulated
