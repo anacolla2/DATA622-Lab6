@@ -7,6 +7,8 @@ format:
     code-overflow: wrap
     code-block-bg: true
     highlight-style: flatly
+  pdf: 
+    toc: true
 embed-resources: true
 toc: true
 toc-depth: 6
@@ -39,6 +41,8 @@ from econml.sklearn_extensions.linear_model import WeightedLassoCVWrapper, Weigh
 from econml.dml import LinearDML
 from econml.score import RScorer
 ```
+
+\newpage
 
 # **Overview**
 
