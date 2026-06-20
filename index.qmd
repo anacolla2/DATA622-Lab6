@@ -499,7 +499,7 @@ The average treatement effect is negative (-0.162). The models both have an
 estimated ATE that are close to the true ATE. Neither of the model confidence
 interval include zero, but both intervals include the ATE value. This suggests
 both models do a decent job at estimating the average treatment effect. However,
-the CausalForestDML is better becuase of the plot showing its nonlinear.
+the CausalForestDML is better because the data was simulated as nonlinear.
 
 ## Problem 2: Checking for Overlap
 
@@ -528,9 +528,11 @@ print(f"\n")
 print(f"The model explains {rsq_t* 100:.1f}% of the variation in log price")
 ```
 
-The model explains a little more than half of the variation in log price which
-leaves room for leftover residual variation. This leftover variation is what's
-necessary for the causal model needs.
+The R^2^ is less than 1.0. The model explains a little more than half of the
+variation in log price which leaves room for leftover residual variation. This
+leftover variation is what's necessary for the causal model needs. Otherwise, if
+the price was caused by the confounders entirely, then there would be nothing
+more for the model to learn.
 
 ## Problem 3: Fitting and Interpreting the Model
 
@@ -565,7 +567,7 @@ cf_real= CausalForestDML(
 cf_real.fit(Y= Y_train, T= T_train, X= X_train, W= W_train)
 ```
 
-We'll create a plot
+We'll create a plot:
 
 ```{python}
 #-- income grid in original income units--
@@ -600,8 +602,8 @@ print(f"Estimated ATE: {ate_real:.3f}")
 print(f"ATE 95% CI: ({ate_lower_real:.2f}, {ate_upper_real:.2f})")
 ```
 
-The results suggest that an increase in price is associated with a \~2.6%
-decrease in sales.
+The results suggest that an increase in price causes a \~2.6% decrease in juice
+sold.
 
 ### (b)
 
@@ -633,7 +635,8 @@ print(f"LinearDML R-score: {linear_rscore:.4f}")
 ```
 
 The CausalForestDML has a slightly higher score, so it is slightly better than
-the LinearDML.
+the LinearDML. Both are close to zero, which means the effect may be different
+between groups, or heteregenous.
 
 ### (c)
 
@@ -730,6 +733,8 @@ plt.show()
 
 ```
 
+The modifier plot shows income is the most important driver of price elasticity.
+
 ```{python}
 #-- elasticity for brands--
 #-- income grid--
@@ -759,9 +764,9 @@ tropicana_effect= cf_brand.effect(tropicana_grid_scaled)
 #-- plot--
 plt.figure(figsize=(10, 6))
 
-plt.plot(income_values, dominicks_effect, label="Dominicks", c= "#8698F3")
-plt.plot(income_values, minute_maid_effect, label="Minute Maid", c= "#A7CE5B")
-plt.plot(income_values, tropicana_effect, label="Tropicana", c= "#FFBA7E")
+plt.plot(income_values, dominicks_effect, label="Dominicks- Budget", c= "#8698F3")
+plt.plot(income_values, minute_maid_effect, label="Minute Maid- Mid", c= "#A7CE5B")
+plt.plot(income_values, tropicana_effect, label="Tropicana- Premium", c= "#FFBA7E")
 
 plt.xlabel("Log income")
 plt.ylabel("Price elasticity")
@@ -770,14 +775,26 @@ plt.legend()
 plt.show()
 ```
 
-The plot shows all three brand have negative elasticity so regardless of brand,
-the model estimates there is a decrease in sales when price increases.
-Dominick's seems to dip the lowest, and is possibly more sensitive to these
-changes. To make the plot more readable I modified the income grid to 30 in
-order to help smooth the jagged volatile plotted lines. The plot is noisy, which
-leads me to believe the minute differences seen between the brands should not be
-relied upon too heavily but rather the overall picture (such as the consensus on
-negative elasticity).
+![Plot with High Granularity](high-granularity.png){fig-align="center"
+width="334"}
+
+(To make the plot more readable, I modified the income grid to 30 in order to
+help smooth plotted lines. Because this is a forest model, the additional grid
+points add more steps into the visualization. A less granular model smoothes the
+plot and makes it a little easier to examine.)
+
+The further from zero the price elasticity the more sensitive to changes in
+price. The plot shows all three brands have negative elasticity, so regardless
+of brand, the model estimates there is increased sensitivity to price changes.
+
+Dominick's brand seems to dip the lowest and is more sensitive to these changes.
+Tropicana and Minute Maid have an overall trend of decreased elasticity the
+higher the log median income of the population. Dominick's is (was) a private
+label of a grocery store and an otherwise less expensive option. We learned
+earlier from the Modifier Plot, that income is an important driver of price
+elasticity and this plot supports that. Dominick's being a budget store brand,
+Tropicana being premium label, it makes intuitive sense that the higher income
+buyers stick with their premium brand of choice.
 
 --------------------------------------------------------------------------------
 
@@ -789,9 +806,11 @@ negative elasticity).
     17-18](https://christophm.github.io/interpretable-ml-book/interpretability.html)
 -   [Fairness and Machine Learning- 1](https://fairmlbook.org/index.html)
 -   CausalML Vignettes 1-3:
-    -   1\) Simulating Data: <https://youtu.be/UVcJWcCVq9g?si=7zLy2QUYuchql0yI>
+    -   1\) Simulating Data:\
+        <https://youtu.be/UVcJWcCVq9g?si=7zLy2QUYuchql0yI>
 
-    -   2\) Recovering Simulated Treatment Effect:
+    -   2\) Recovering Simulated Treatment Effect:\
         <https://youtu.be/GV2q_saIbsk?si=ufKcDpw09Jsz05Dy>
 
-    -   3\) Quality Checks and Fit to Data: <https://youtu.be/ZxszowvvEoY>
+    -   3\) Quality Checks and Fit to Data: \
+        <https://youtu.be/ZxszowvvEoY>
