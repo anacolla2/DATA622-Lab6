@@ -11,6 +11,9 @@ embed-resources: true
 toc: true
 toc-depth: 6
 toc-location: right
+execute: 
+  error: false
+  warning: false
 editor: visual
 jupyter: python3
 ---
@@ -738,6 +741,8 @@ tropicana_grid= pd.DataFrame({"income": income_values, "brand_minute.maid": 0, "
 ```
 
 ```{python}
+#| error: false
+#| warning: false
 #-- scale--
 dominicks_grid_scaled= X_scaler_b.transform(dominicks_grid)
 minute_maid_grid_scaled= X_scaler_b.transform(minute_maid_grid)
