@@ -34,6 +34,7 @@ from econml.orf import DMLOrthoForest, DROrthoForest
 from econml.dml import CausalForestDML
 from econml.sklearn_extensions.linear_model import WeightedLassoCVWrapper, WeightedLasso
 from econml.dml import LinearDML
+from econml.score import RScorer
 ```
 
 # **Overview**
@@ -44,7 +45,7 @@ The dataset is a subset of a dataset compiled during a large study by the
 Chicago Booth School of Business, which collaborated with a local supermarket
 chain called Dominick\`s Finer Foods, to study the impact of prices,
 advertising, and demographics on the sales of a number of products. The dataset
-we are working with has over 29,000 observations of the price of orange juice
+we are working with has over 29, 000 observations of the price of orange juice
 and sales for different brands at different Dominick\`s stores. There is a
 dataset description here:
 [\[](https://github.com/georgehagstrom/DATA622Spring2026/blob/main/website/assignments/labs/labData/oj_dictionary.qmd)[oj_dictionary.qmd\]](https://raw.githubusercontent.com/georgehagstrom/DATA622Spring2026/refs/heads/main/website/assignments/labs/labData/oj_dictionary.qmd)
@@ -67,7 +68,7 @@ of both sales and price, as the elasticity becomes the coefficient in a linear
 regression model relating the two:
 
 $$
-\log(\mathrm{SALES}) = \epsilon\log(\mathrm{PRICE}) + \mathrm{error\ terms}
+\log(\mathrm{SALES})= \epsilon\log(\mathrm{PRICE}) + \mathrm{error\ terms}
 $$
 
 The elasticity $\epsilon$ can be dependent upon a variety of other factors. It
@@ -121,7 +122,7 @@ for orange juice
 
 `WORKWOM`: The percentage of women in the area with full time jobs
 
-`HVAL150`: The percentage of households with more than \$150,000 of net worth
+`HVAL150`: The percentage of households with more than \$150, 000 of net worth
 
 `SSTRDIST`: The average distance in miles to the nearest warehouse store
 
@@ -155,7 +156,7 @@ random (the 0.8 is just for scale).
 
 Look to the simulation code earlier in the `EconML` vignette for inspiration.
 
-The original vignette uses the code below to create the fake data:\
+The original vignette uses the code below to create the fake data:
 
 ```{python}
 #| echo: true
@@ -196,7 +197,7 @@ X_test= np.array(list(product(np.arange(0, 1, 0.01), repeat=n_x)))
 ```
 
 We'll modify the code to fit this problem. First, we set a seed to help the
-synthetic data reproducible:
+synthetic data reproduciblity:
 
 ```{python}
 np.random.seed(646)
@@ -265,10 +266,10 @@ might be counterproductive here).
 support= np.random.choice(range(n_conf), size=support_size, replace= False)
 
 #--strength of confounder affect of treatment--
-coefs_T= np.random.uniform(0,1, size= support_size)
+coefs_T= np.random.uniform(0, 1, size= support_size)
 
 #--strength of confounder effect of outcome--
-coefs_Y= np.random.uniform(0,1, size= support_size)
+coefs_Y= np.random.uniform(0, 1, size= support_size)
 
 #-- random sim prices--
 noise_T= np.random.uniform(-1, 1, size=W.shape[0])
@@ -285,12 +286,11 @@ $$
 
 ```{python}
 #-- Treatmnet--
-#-- (T_sim= (0.8) + (W[:,support] @ coefs_T) + (noise_T)--
+#-- (T_sim= (0.8) + (W[:, support] @ coefs_T) + (noise_T)--
 t_intercept= 0.8
 t_confounder= W[:, support] @ coefs_T
 t_noise= noise_T
 T_sim= t_intercept+ t_confounder+ t_noise
-
 ```
 
 --------------------------------------------------------------------------------
@@ -334,8 +334,8 @@ performance of both models on the simulated data.
 
 ```{python}
 cf= CausalForestDML(
-  model_y= ensemble.RandomForestRegressor(n_estimators= 100, min_samples_leaf= 10, random_state= 646),
-  model_t= ensemble.RandomForestRegressor(n_estimators= 100, min_samples_leaf= 10, random_state= 646),
+  model_y= ensemble.RandomForestRegressor(n_estimators= 100, min_samples_leaf= 10, random_state= 646), 
+  model_t= ensemble.RandomForestRegressor(n_estimators= 100, min_samples_leaf= 10, random_state= 646), 
   n_estimators= 500, min_samples_leaf= 10, random_state= 646)
 #-- fit--
 cf.fit(Y= Y_sim, T= T_sim, X= X, W= W)
@@ -343,8 +343,8 @@ cf.fit(Y= Y_sim, T= T_sim, X= X, W= W)
 
 ```{python}
 linear= LinearDML(
-  model_y= ensemble.RandomForestRegressor(n_estimators= 100, min_samples_leaf= 50, random_state= 646),
-  model_t= ensemble.RandomForestRegressor(n_estimators= 100, min_samples_leaf= 50, random_state= 646),
+  model_y= ensemble.RandomForestRegressor(n_estimators= 100, min_samples_leaf= 50, random_state= 646), 
+  model_t= ensemble.RandomForestRegressor(n_estimators= 100, min_samples_leaf= 50, random_state= 646), 
   random_state= 646)
 #-- fit--
 linear.fit(Y= Y_sim, T= T_sim, X= X, W= W)
@@ -367,7 +367,7 @@ cf_lower_grid, cf_upper_grid= cf.effect_interval(x_grid)
 #| title: "Causal Forest Plot: Estimates vs True"
 true_cate_grid= (-2.5* np.tanh(2.0 * x_grid)).ravel()
 
-plt.figure(figsize= (10,5))
+plt.figure(figsize= (10, 5))
 plt.plot(x_grid.ravel(), cf_cate_grid, label= "CausalForestDML Prediction")
 
 #-- adding confidence intervals--
@@ -389,7 +389,7 @@ a linear one. The confidence interval overlayed on the estimates is also very
 close, so we can say the model is pretty confident about its predictions,
 particularly in the center.
 
-Now for the linear DML
+Now for the LinearDML:
 
 ```{python}
 #| title: "Linear Plot: Estimates vs True"
@@ -408,7 +408,7 @@ true_cate_grid= (-2.5 * np.tanh(2.0 * x_grid)).ravel()
 #-- plotting--
 plt.figure(figsize=(10, 5))
 plt.plot(x_grid.ravel(), lin_cate_grid, label="LinearDML Prediction")
-plt.fill_between(x_grid.ravel(), lin_lower_grid, lin_upper_grid, label="95% CI",alpha=0.3)
+plt.fill_between(x_grid.ravel(), lin_lower_grid, lin_upper_grid, label="95% CI", alpha=0.3)
 
 plt.plot(x_grid.ravel(), true_cate_grid, "r--", label="True elasticity")
 
@@ -428,15 +428,15 @@ choice here.
 Next, we'll look at the observations:
 
 ```{python}
-#| title: "CausalForestDML Plot: Observations"
+#| title: "CausalForestDML & LinearDML: Observations"
 #| layout-ncol: 2
 
 #-- CF--
 cf_obs= cf.effect(X)
 plt.figure(figsize=(6, 6))
 
-plt.scatter(true_cate_obs, cf_obs, alpha=0.3)
-plt.axline((0, 0), slope=1)
+plt.scatter(true_cate_obs, cf_obs,c= "#FD6947", s= 0.8, alpha=0.3)
+plt.axline((0, 0), slope=1, alpha= 0.2)
 
 plt.xlabel("True elasticity")
 plt.ylabel("Predicted elasticity")
@@ -447,8 +447,8 @@ plt.show()
 linear_obs= linear.effect(X)
 plt.figure(figsize=(6, 6))
 
-plt.scatter(true_cate_obs, linear_obs, alpha=0.3)
-plt.axline((0, 0), slope=1)
+plt.scatter(true_cate_obs, linear_obs,c= "#8698F3", s= 0.8, alpha=0.3)
+plt.axline((0, 0), slope=1, alpha= 0.2)
 
 plt.xlabel("True elasticity")
 plt.ylabel("Predicted elasticity")
@@ -456,6 +456,11 @@ plt.title("LinearDML: True vs Predicted Elasticity")
 plt.show()
 
 ```
+
+The observations plots compare a diagnal line (as the ideal predictions) to the
+predicted elasticity. The CausalDML observations (orange dots) follow the line
+closely. On the other hand the LinearDML has overall more points with a large
+distance from the line.
 
 #### Average Treatment Effect (ATE)
 
@@ -482,6 +487,12 @@ print(f"\n")
 print(f"LinearDML estimated ATE: {linear_ate:.3f}")
 print(f"LinearDML ATE CI: ({linear_ate_lower:.3f}, {linear_ate_upper:.3f})")
 ```
+
+The average treatement effect is negative (-0.162). The models both have an
+estimated ATE that are close to the true ATE. Neither of the model confidence
+interval include zero, but both intervals include the ATE value. This suggests
+both models do a decent job at estimating the average treatment effect. However,
+the CausalForestDML is better becuase of the plot showing its nonlinear.
 
 ## Problem 2: Checking for Overlap
 
@@ -511,7 +522,8 @@ print(f"The model explains {rsq_t* 100:.1f}% of the variation in log price")
 ```
 
 The model explains a little more than half of the variation in log price which
-leaves room for left-over residual variation.
+leaves room for leftover residual variation. This leftover variation is what's
+necessary for the causal model needs.
 
 ## Problem 3: Fitting and Interpreting the Model
 
@@ -528,7 +540,7 @@ Calculate the average treatment effect and confidence intervals.
 T= np.log(oj["price"]).values
 Y= oj["logmove"].values
 
-Y_train, Y_test, T_train, T_test,X_train_raw, X_test_raw, W_train_raw, W_test_raw= ms.train_test_split(Y, T, prep_x, prep_w, test_size=0.2, random_state=646)
+Y_train, Y_test, T_train, T_test, X_train_raw, X_test_raw, W_train_raw, W_test_raw= ms.train_test_split(Y, T, prep_x, prep_w, test_size=0.2, random_state=646)
 
 #-- scaling-- 
 W_scaler= pp.StandardScaler()
@@ -541,29 +553,29 @@ X_test= X_scaler.transform(X_test_raw)
 
 #-- fit-- 
 cf_real= CausalForestDML(
-  model_y=WeightedLassoCVWrapper(cv=3), model_t=WeightedLassoCVWrapper(cv=3), n_estimators=500, min_samples_leaf=10, max_depth=50, max_samples=0.45, random_state=646)
+  model_y=WeightedLassoCVWrapper(), model_t=WeightedLassoCVWrapper(), n_estimators=500, min_samples_leaf=10, max_depth=50, random_state=646)
 
-cf_real.fit(Y= Y_train,T= T_train,X= X_train,W= W_train)
+cf_real.fit(Y= Y_train, T= T_train, X= X_train, W= W_train)
+```
 
-#-- plot-- 
+We'll create a plot
+
+```{python}
 #-- income grid in original income units--
-income_grid_raw= pd.DataFrame(
-    np.linspace(X_train_raw["income"].min(), X_train_raw["income"].max(), 100),
-    columns=["income"]
-)
+income_grid_raw= pd.DataFrame(np.linspace(X_train_raw["income"].min(), X_train_raw["income"].max(), 100), columns=["income"])
 
 #-- scale income grid--
 income_grid= X_scaler.transform(income_grid_raw)
 
 #-- predicted elasticity--
-elasticity_grid= cf_real.effect(income_grid)
-elasticity_lower, elasticity_upper= cf_real.effect_interval(income_grid)
+e_grid= cf_real.effect(income_grid)
+e_lower, e_upper= cf_real.effect_interval(income_grid)
 
 #-- plot--
-plt.figure(figsize=(10, 6))
-plt.plot(income_grid_raw["income"], elasticity_grid, label="Estimated price elasticity")
-plt.fill_between(income_grid_raw["income"],elasticity_lower,elasticity_upper,alpha=0.3,label="95% CI")
-plt.plot(X_train_raw["income"],np.zeros_like(X_train_raw["income"]),"|",color="gray",alpha=0.1,markersize=5)
+plt.figure(figsize=(10,  6))
+plt.plot(income_grid_raw["income"], e_grid, label="Estimated price elasticity")
+plt.fill_between(income_grid_raw["income"], e_lower, e_upper, alpha=0.3, label="95% CI")
+plt.plot(X_train_raw["income"], np.repeat(e_lower.min(), len(X_train_raw)), "|", color="gray", alpha=0.1, markersize=2)
 plt.xlabel("Log income")
 plt.ylabel("Price elasticity")
 plt.title("CausalForestDML: Price Elasticity vs Income")
@@ -578,8 +590,11 @@ ate_real= cf_real.ate(X=X_test)
 ate_lower_real, ate_upper_real= cf_real.ate_interval(X=X_test)
 
 print(f"Estimated ATE: {ate_real:.3f}")
-print(f"ATE 95% CI: ({ate_lower_real:.3f}, {ate_upper_real:.3f})")
+print(f"ATE 95% CI: ({ate_lower_real:.2f}, {ate_upper_real:.2f})")
 ```
+
+The results suggest that an increase in price is associated with a \~2.6%
+decrease in sales.
 
 ### (b)
 
@@ -590,21 +605,28 @@ Fit a `LinearDML` model in the same manner and compare the R-score to the
 `CausalForestDML`. Is either model noticeably better?
 
 ```{python}
-#-- R-score for CausalForestDML--
-cf_rscore= cf_real.score(Y=Y_test,T=T_test,X=X_test,W=W_test)
+#--fit--
+linear_real= LinearDML(model_y=WeightedLassoCVWrapper(), 
+model_t=WeightedLassoCVWrapper(),random_state=646)
 
-#-- LinearDML fit--
-linear_real= LinearDML(model_y=WeightedLassoCVWrapper(cv=3),model_t=WeightedLassoCVWrapper(cv=3),random_state=646)
+linear_real.fit(Y=Y_train, T=T_train, X=X_train, W=W_train)
 
-linear_real.fit(Y=Y_train,T=T_train,X=X_train, W=W_train)
+#-- EconML Rscore--
+rscorer= RScorer(model_y=WeightedLassoCVWrapper(), model_t=WeightedLassoCVWrapper(), random_state=646)
 
-#-- R-score for LinearDML--
-linear_rscore= linear_real.score(Y=Y_test,T=T_test,X=X_test,W=W_test)
+#-- rscore fit--
+rscorer.fit(Y_test, T_test, X=X_test, W=W_test)
+
+#-- r-score--
+cf_rscore= rscorer.score(cf_real)
+linear_rscore= rscorer.score(linear_real)
 
 print(f"CausalForestDML R-score: {cf_rscore:.4f}")
 print(f"LinearDML R-score: {linear_rscore:.4f}")
-print(f"Difference: {linear_rscore - cf_rscore:.4f}")
 ```
+
+The CausalForestDML has a slightly higher score, so it is slightly better than
+the LinearDML.
 
 ### (c)
 
@@ -613,107 +635,89 @@ model. This determines how strong an \_unobserved confounder\_ would have to be
 to change the results of your analysis in a meaningful way. The method
 recalculates confidence intervals for the \_ATE\_ based on two parameters `c_t`
 and `c_y`, which are the fraction of residual variance explained by the
-hypothetical confounder for the treatment and the target respectively. One
-method for determining the range of `c_t` and `c_y` to explore by checking the
-values of `c_t` and `c_y` for existing confounders. If you were to do this
-check, you would find that the most important confounder is the `feat` variable
+hypothetical confounder for the treatment and the target respectively.
 
+One method for determining the range of `c_t` and `c_y` to explore by checking
+the values of `c_t` and `c_y` for existing confounders. If you were to do this
+check, you would find that the most important confounder is the `feat` variable
 (whether the item was advertised that week), and the range should be up to
-`c_t=0.1` and `c_y=0.3`. Compute the sensitivity check for the most extreme
-scenario, with `c_t=0.1` and `c_y=0.3`. What are the resulting confidence
-intervals for the ATE? Do they contain 0?
+`c_t=0.1` and `c_y=0.3`.
+
+Compute the sensitivity check for the most **extreme scenario**, with `c_t=0.1`
+and `c_y=0.3`. What are the resulting confidence intervals for the ATE? Do they
+contain 0?
 
 ```{python}
-#-- sensitivity check for most extreme scenario--
-sens_lower, sens_upper = cf_real.sensitivity_interval(
-    c_t=0.1,
-    c_y=0.3,
-    alpha=0.05
-)
+sens_lower, sens_upper= cf_real.sensitivity_interval(c_t=0.1, c_y=0.3, alpha=0.05)
 
-print(f"Sensitivity interval: ({sens_lower:.3f}, {sens_upper:.3f})")
-
-print(f"Does the sensitivity interval contain 0? {sens_lower <= 0 <= sens_upper}")
+print(f"Extreme Sensitivity interval: ({sens_lower:.2f}, {sens_upper:.2f})")
 ```
+
+The sensitivity interval does not include zero. So, this suggests that even in
+an "extreme senario" the average treatment estimate is negative. The models
+support the idea that price increases cause a decline in sales.
 
 ## Problem 4: CATE for Brands and Income
 
-The three brands of orange juice have different price points and are targetted
-at different customer segments, with `dominicks` as the discount brand,
+The three brands of orange juice have different price points and are targeted at
+different customer segments, with `dominicks` as the discount brand,
 `minute.maid` as the mid-range brand, and `tropicana` as the premium brand. Move
 the brand variables from confounder matrix W to the modifier matrix X and refit
-the model. Calculate the feature importances for all the modifiers and plot the
-elasticity as a function of income for each of the three brands. How do the
-elasticities differ by brand?
+the model.
+
+Calculate the feature importance for all the modifiers and plot the elasticity
+as a function of income for each of the three brands. How do the elasticities
+differ by brand?
+
+The brand column was one hot encoded at the start of the report, we'll extract
+those.
 
 ```{python}
-#-- brand dummy columns already created earlier--
-brand_cols = [col for col in oj.columns if col.startswith("brand_")]
+brand_cols= [col for col in oj.columns if col.startswith("brand_")]
 brand_cols
+```
 
-#-- brand dummy columns--
-brand_cols = [col for col in oj.columns if col.startswith("brand_")]
+There are only two brand columns but there are three brands. This is because I
+used `drop_first= True` at the start of the report when I one-hot encoded. One
+of the juice brands is coded as 0, 0; Dominick's.
 
+```{python}
 #-- treatment and outcome--
-T = np.log(oj["price"]).values
-Y = oj["logmove"].values
+T= np.log(oj["price"]).values
+Y= oj["logmove"].values
 
-#-- move brand from W into X--
-prep_x_brand = oj[["income"] + brand_cols]
-prep_w_brand = prep_w.drop(columns=brand_cols)
+prep_x_brand= oj[["income"]+ brand_cols]
+prep_w_brand= prep_w.drop(columns=brand_cols)
 
 #-- split and scale-- 
-Y_train_b, Y_test_b, T_train_b, T_test_b, X_train_raw_b, X_test_raw_b, W_train_raw_b, W_test_raw_b = ms.train_test_split(
-    Y,
-    T,
-    prep_x_brand,
-    prep_w_brand,
-    test_size=0.2,
-    random_state=646
-)
+Y_train_b, Y_test_b, T_train_b, T_test_b, X_train_raw_b, X_test_raw_b, W_train_raw_b, W_test_raw_b= ms.train_test_split(Y,  T,  prep_x_brand,  prep_w_brand,  test_size=0.2,  random_state=646)
 
-W_scaler_b = pp.StandardScaler()
-W_train_b = W_scaler_b.fit_transform(W_train_raw_b)
-W_test_b = W_scaler_b.transform(W_test_raw_b)
+W_scaler_b= pp.StandardScaler()
+W_train_b= W_scaler_b.fit_transform(W_train_raw_b)
+W_test_b= W_scaler_b.transform(W_test_raw_b)
 
-X_scaler_b = pp.StandardScaler()
-X_train_b = X_scaler_b.fit_transform(X_train_raw_b)
-X_test_b = X_scaler_b.transform(X_test_raw_b)
+X_scaler_b= pp.StandardScaler()
+X_train_b= X_scaler_b.fit_transform(X_train_raw_b)
+X_test_b= X_scaler_b.transform(X_test_raw_b)
 
 #--fit--
-cf_brand = CausalForestDML(
-    model_y=WeightedLassoCVWrapper(cv=3),
-    model_t=WeightedLassoCVWrapper(cv=3),
-    n_estimators=500,
-    min_samples_leaf=10,
-    max_depth=50,
-    max_samples=0.45,
-    random_state=646
-)
+cf_brand= CausalForestDML(model_y=WeightedLassoCVWrapper(), model_t=WeightedLassoCVWrapper(), n_estimators=500, min_samples_leaf=10, max_depth=50,random_state=646)
 
-cf_brand.fit(
-    Y=Y_train_b,
-    T=T_train_b,
-    X=X_train_b,
-    W=W_train_b
-)
+cf_brand.fit(Y=Y_train_b, T=T_train_b, X=X_train_b, W=W_train_b)
 ```
 
 ```{python}
 #-- feature importance--
-importance_df = pd.DataFrame({
-    "modifier": prep_x_brand.columns,
-    "importance": cf_brand.feature_importances_
-}).sort_values("importance", ascending=False)
-
+importance_df= pd.DataFrame({"modifier": prep_x_brand.columns, 
+"importance": cf_brand.feature_importances_}).sort_values("importance", ascending=False)
 importance_df
 
 #-- plot--
-plt.figure(figsize=(8, 5))
-plt.barh(importance_df["modifier"], importance_df["importance"])
+plt.figure(figsize=(10, 6))
+plt.barh(importance_df["modifier"], importance_df["importance"], color= "#A7CE5B")
 plt.xlabel("Feature importance")
-plt.ylabel("Modifier")
-plt.title("CATE Modifier Importances")
+plt.ylabel("Modifiers")
+plt.title("Modifier Importances for Price Elasticity")
 plt.gca().invert_yaxis()
 plt.show()
 
@@ -721,49 +725,34 @@ plt.show()
 
 ```{python}
 #-- elasticity for brands--
-
 #-- income grid--
-income_values = np.linspace(
-    X_train_raw_b["income"].min(),
-    X_train_raw_b["income"].max(),
-    100
-)
+#--(changing to 30 for more smoothness and clarity in the plot-- )
+income_values= np.linspace(X_train_raw_b["income"].min(), X_train_raw_b["income"].max(), 30)
 
-#-- brand scenarios--
-dominicks_grid = pd.DataFrame({
-    "income": income_values,
-    "brand_minute.maid": 0,
-    "brand_tropicana": 0
-})
+#-- defining the brand encoding--
+dominicks_grid= pd.DataFrame({"income": income_values, "brand_minute.maid": 0, "brand_tropicana": 0})
 
-minute_maid_grid = pd.DataFrame({
-    "income": income_values,
-    "brand_minute.maid": 1,
-    "brand_tropicana": 0
-})
+minute_maid_grid= pd.DataFrame({"income": income_values, "brand_minute.maid": 1, "brand_tropicana": 0})
 
-tropicana_grid = pd.DataFrame({
-    "income": income_values,
-    "brand_minute.maid": 0,
-    "brand_tropicana": 1
-})
+tropicana_grid= pd.DataFrame({"income": income_values, "brand_minute.maid": 0, "brand_tropicana": 1})
+```
 
-#-- scale grids--
-dominicks_grid_scaled = X_scaler_b.transform(dominicks_grid)
-minute_maid_grid_scaled = X_scaler_b.transform(minute_maid_grid)
-tropicana_grid_scaled = X_scaler_b.transform(tropicana_grid)
+```{python}
+#-- scale--
+dominicks_grid_scaled= X_scaler_b.transform(dominicks_grid)
+minute_maid_grid_scaled= X_scaler_b.transform(minute_maid_grid)
+tropicana_grid_scaled= X_scaler_b.transform(tropicana_grid)
 
-#-- predict elasticities--
-dominicks_effect = cf_brand.effect(dominicks_grid_scaled)
-minute_maid_effect = cf_brand.effect(minute_maid_grid_scaled)
-tropicana_effect = cf_brand.effect(tropicana_grid_scaled)
+dominicks_effect= cf_brand.effect(dominicks_grid_scaled)
+minute_maid_effect= cf_brand.effect(minute_maid_grid_scaled)
+tropicana_effect= cf_brand.effect(tropicana_grid_scaled)
 
 #-- plot--
-plt.figure(figsize=(10, 5))
+plt.figure(figsize=(10, 6))
 
-plt.plot(income_values, dominicks_effect, label="Dominicks")
-plt.plot(income_values, minute_maid_effect, label="Minute Maid")
-plt.plot(income_values, tropicana_effect, label="Tropicana")
+plt.plot(income_values, dominicks_effect, label="Dominicks", c= "#8698F3")
+plt.plot(income_values, minute_maid_effect, label="Minute Maid", c= "#A7CE5B")
+plt.plot(income_values, tropicana_effect, label="Tropicana", c= "#FFBA7E")
 
 plt.xlabel("Log income")
 plt.ylabel("Price elasticity")
@@ -771,6 +760,15 @@ plt.title("Estimated Price Elasticity by Income and Brand")
 plt.legend()
 plt.show()
 ```
+
+The plot shows all three brand have negative elasticity so regardless of brand,
+the model estimates there is a decrease in sales when price increases.
+Dominick's seems to dip the lowest, and is possibly more sensitive to these
+changes. To make the plot more readable I modified the income grid to 30 in
+order to help smooth the jagged volatile plotted lines. The plot is noisy, which
+leads me to believe the minute differences seen between the brands should not be
+relied upon too heavily but rather the overall picture (such as the consensus on
+negative elasticity).
 
 --------------------------------------------------------------------------------
 
@@ -787,5 +785,4 @@ plt.show()
     -   2\) Recovering Simulated Treatment Effect:
         <https://youtu.be/GV2q_saIbsk?si=ufKcDpw09Jsz05Dy>
 
-    -   3\)
--   
+    -   3\) Quality Checks and Fit to Data: <https://youtu.be/ZxszowvvEoY>
